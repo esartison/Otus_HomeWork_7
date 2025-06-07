@@ -276,9 +276,6 @@ postgres=# \l
  template1    | esartison | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           >
               |           |          |                 |            |            |        |           >
 
-postgres=# select pg_read_file('/etc/hostname') as hostname
-postgres-# \echo :hostname
-:hostname
 postgres-# \conninfo
 You are connected to database "postgres" as user "esartison" on host "127.0.0.1" at port "5555".
 
