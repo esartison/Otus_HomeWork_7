@@ -9,15 +9,20 @@
 
 ![image](https://github.com/user-attachments/assets/05e58bc6-67a8-49ec-aadb-c742c0166a2b)
 
+
 **Установите и запустите Minikube.**
+
 ![image](https://github.com/user-attachments/assets/2aae8a08-ace9-4a33-b8a6-b5ee2c3799a2)
 
 
 **Убедитесь, что у вас установлены kubectl и psql.**
+
 psql стоит 
+
 ![image](https://github.com/user-attachments/assets/57e48cc4-0f09-4b07-a67c-3ac731b58957)
 
 kubectl стоит и работает
+
 ![image](https://github.com/user-attachments/assets/b1358a70-9a67-4626-a49a-1235dc15509c)
 
 
