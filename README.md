@@ -247,15 +247,48 @@ postgres-7fd78bcdf8-llccq   1/1     Running   0          16m
 
 **Убедитесь, что база данных поднимается и отвечает на подключения (kubectl port-forward + psql).**
 
-включиить port forward
+включиить port forward на 5432 в POD-е на 5555 локально
 ``` 
-student:~/test1$ kubectl port-forward --namespace default svc/postgres 5432:5432 
-[1] 237773
-student:~/test1$ Forwarding from [::1]:5432 -> 5432
+student:~$ kubectl port-forward --namespace default svc/postgres 5555:5432 
+Forwarding from 127.0.0.1:5555 -> 5432
+Forwarding from [::1]:5555 -> 5432
+Handling connection for 5555
+Handling connection for 5555
+Handling connection for 5555
+
 ```
 
+проверить локальное подключение к postgres кластеру в Kuber под схемой esartison по порту 5555
+```
+student:~$ read -s POSTGRES_PASSWORD
+student:~$ PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -p 5555 -U esartison postgres
+psql (17.5 (Ubuntu 17.5-1.pgdg22.04+1))
+Type "help" for help.
 
+postgres=# \l
+                                                       List of databases
+     Name     |   Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | Locale | ICU Rules >
+--------------+-----------+----------+-----------------+------------+------------+--------+----------->
+ esartison_db | esartison | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           >
+ postgres     | esartison | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           >
+ template0    | esartison | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           >
+              |           |          |                 |            |            |        |           >
+ template1    | esartison | UTF8     | libc            | en_US.utf8 | en_US.utf8 |        |           >
+              |           |          |                 |            |            |        |           >
 
+postgres=# select pg_read_file('/etc/hostname') as hostname
+postgres-# \echo :hostname
+:hostname
+postgres-# \conninfo
+You are connected to database "postgres" as user "esartison" on host "127.0.0.1" at port "5555".
+
+postgres=# SELECT inet_server_port() AS portNumber;
+ portnumber 
+------------
+       5432
+```
+
+Все прошло успешно!
 
 ## ⭐ Задание повышенной сложности ##
 ## Шаг 2: Развернуть PostgreSQL через Helm ##
@@ -267,6 +300,7 @@ https://phoenixnap.com/kb/postgresql-kubernetes
 **Укажите параметры подключения в values.yaml.**
 
 **Обеспечьте масштабируемость: задайте replicaCount: 3 или используйте StatefulSet, если уверены.**
+
 
 
 ## 🔥 Кризисный момент ## 
