@@ -207,6 +207,7 @@ postgres     NodePort    10.109.208.50   <none>        5432:30432/TCP   56s
 ```        
 
 **Укажите имя пользователя и пароль через переменные окружения в Deployment (например, POSTGRES_USER и POSTGRES_PASSWORD).**
+
 указал во время создания deployment-а
 ![image](https://github.com/user-attachments/assets/30ded318-0023-425b-bf6a-4adba74e14cd)
 
