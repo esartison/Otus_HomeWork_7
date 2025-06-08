@@ -341,6 +341,9 @@ version.BuildInfo{Version:"v3.18.1", GitCommit:"f6f8700a539c18101509434f3b59e6a2
 
 **Найдите и установите подходящий Helm-чарт PostgreSQL 14 (например, Bitnami PostgreSQL).**
 
+student:~/helm$ helm repo add bitnami  https://mirror.yandex.ru/helm/charts.bitnami.com
+"bitnami" has been added to your repositories
+
 ```
 kubectl create secret generic postgres-credentials -n default \
   --from-literal=POSTGRES_PASSWORD='AdminPassword' \
