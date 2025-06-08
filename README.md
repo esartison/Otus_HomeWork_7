@@ -328,8 +328,84 @@ student:~$ minikube start --cpus 4 --memory 4g
 ## Шаг 2: Развернуть PostgreSQL через Helm ##
 https://phoenixnap.com/kb/postgresql-kubernetes
 **Установите Helm.**
+```
+curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+sudo apt-get install apt-transport-https --yes
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
+student:~$ helm version
+version.BuildInfo{Version:"v3.18.1", GitCommit:"f6f8700a539c18101509434f3b59e6a21402a1b2", GitTreeState:"clean", GoVersion:"go1.24.3"}
+```
 
 **Найдите и установите подходящий Helm-чарт PostgreSQL 14 (например, Bitnami PostgreSQL).**
+
+```
+kubectl create secret generic postgres-credentials -n default \
+  --from-literal=POSTGRES_PASSWORD='AdminPassword' \
+  --from-literal=APP_DB_PASSWORD='AUserPassword'
+```
+
+Создать директории
+```
+sudo mkdir -p /data/postgres-data /data/postgres-dump
+
+sudo chown -R 1001:1001 /data/postgres-data
+sudo chown -R 1001:1001 /data/postgres-dump
+
+sudo chmod -R 750 /data/postgres-data
+sudo chmod -R 750 /data/postgres-dump
+```
+
+
+Create Persistent Volumes
+```
+student:~/helm$ cat postgres-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-data-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: database
+    name: data-postgres-postgresql-0
+  hostPath:
+    path: /data/postgres-data
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-dump-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  claimRef:
+    namespace: database
+    name: postgres-postgresql-pgdumpall
+  hostPath:
+    path: /data/postgres-dump
+    type: DirectoryOrCreate
+
+student:~/helm$ kubectl create -f postgres-pv.yaml
+persistentvolume/postgres-data-pv created
+persistentvolume/postgres-dump-pv created
+
+```
+
+https://artifacthub.io/packages/helm/bitnami/postgresql-ha
+helm install helmtestrel oci://registry-1.docker.io/bitnamicharts/postgresql-ha --set postgresql.replicaCount=2
 
 **Укажите параметры подключения в values.yaml.**
 
