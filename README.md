@@ -405,12 +405,15 @@ persistentvolume/postgres-dump-pv created
 ```
 
 https://artifacthub.io/packages/helm/bitnami/postgresql-ha
+
 helm install helmtestrel oci://registry-1.docker.io/bitnamicharts/postgresql-ha --set postgresql.replicaCount=2
 
 **Укажите параметры подключения в values.yaml.**
 
 **Обеспечьте масштабируемость: задайте replicaCount: 3 или используйте StatefulSet, если уверены.**
-
+student:~/helm$ kubectl scale --replicas=3 deployment helmtestrel-postgresql-ha-pgpool -n default
+kubectl get deployments
+student:~/helm$ kubectl get pod -A
 
 
 ## 🔥 Кризисный момент ## 
