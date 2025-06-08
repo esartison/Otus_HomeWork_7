@@ -403,7 +403,7 @@ persistentvolume/postgres-data-pv created
 persistentvolume/postgres-dump-pv created
 
 ```
-
+https://cicube.io/blog/postgres-kubernetes/
 https://artifacthub.io/packages/helm/bitnami/postgresql-ha
 
 helm install helmtestrel oci://registry-1.docker.io/bitnamicharts/postgresql-ha --set postgresql.replicaCount=2
