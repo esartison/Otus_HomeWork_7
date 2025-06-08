@@ -290,6 +290,41 @@ postgres=# SELECT inet_server_port() AS portNumber;
 Все прошло успешно!
 
 ## ⭐ Задание повышенной сложности ##
+очистить предыдущую конфигурацию в MiniKube
+```
+student:~$ minikube delete
+🔥  Deleting "minikube" in docker ...
+🔥  Deleting container "minikube" ...
+🔥  Removing /home/student/.minikube/machines/minikube ...
+💀  Removed all traces of the "minikube" cluster.
+```
+
+запустить minikube с большим кол-вом ресурсов
+```
+student:~$ minikube start --cpus 4 --memory 4g
+😄  minikube v1.36.0 on Ubuntu 22.04 (vbox/amd64)
+❗  The minimum required version for podman is "4.9.0". your version is "3.4.4". minikube might not work. use at your own risk. To install latest version please see https://podman.io/getting-started/installation.html
+✨  Automatically selected the docker driver. Other choices: podman, none, ssh
+
+🧯  The requested memory allocation of 4096MiB does not leave room for system overhead (total system memory: 4816MiB). You may face stability issues.
+💡  Suggestion: Start minikube with less memory allocated: 'minikube start --memory=2200mb'
+
+📌  Using Docker driver with root privileges
+👍  Starting "minikube" primary control-plane node in "minikube" cluster
+🚜  Pulling base image v0.0.47 ...
+🔥  Creating docker container (CPUs=4, Memory=4096MB) ...
+🐳  Preparing Kubernetes v1.33.1 on Docker 28.1.1 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+🔗  Configuring bridge CNI (Container Networking Interface) ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+```
+
+
 ## Шаг 2: Развернуть PostgreSQL через Helm ##
 https://phoenixnap.com/kb/postgresql-kubernetes
 **Установите Helm.**
