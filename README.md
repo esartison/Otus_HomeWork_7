@@ -340,76 +340,115 @@ version.BuildInfo{Version:"v3.18.1", GitCommit:"f6f8700a539c18101509434f3b59e6a2
 ```
 
 **Найдите и установите подходящий Helm-чарт PostgreSQL 14 (например, Bitnami PostgreSQL).**
+добавить репозиторий, для оригинального поймал ошибку - использовал российское зеркало
+```
+student:~$ helm repo add bitnami https://charts.bitnami.com/bitnami
+Error: looks like "https://charts.bitnami.com/bitnami" is not a valid chart repository or cannot be reached: failed to fetch https://charts.bitnami.com/bitnami/index.yaml : 403 Forbidden
 
-student:~/helm$ helm repo add bitnami  https://mirror.yandex.ru/helm/charts.bitnami.com
+student:~$ helm repo add bitnami  https://mirror.yandex.ru/helm/charts.bitnami.com
 "bitnami" has been added to your repositories
-
-```
-kubectl create secret generic postgres-credentials -n default \
-  --from-literal=POSTGRES_PASSWORD='AdminPassword' \
-  --from-literal=APP_DB_PASSWORD='AUserPassword'
-```
-
-Создать директории
-```
-sudo mkdir -p /data/postgres-data /data/postgres-dump
-
-sudo chown -R 1001:1001 /data/postgres-data
-sudo chown -R 1001:1001 /data/postgres-dump
-
-sudo chmod -R 750 /data/postgres-data
-sudo chmod -R 750 /data/postgres-dump
+student:~$ helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "postgres-operator-charts" chart repository
+...Successfully got an update from the "kubernetes-dashboard" chart repository
+...Successfully got an update from the "bitnami" chart repository
+Update Complete. ⎈Happy Helming!⎈
 ```
 
-
-Create Persistent Volumes
+создать PV
 ```
 student:~/helm$ cat postgres-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: postgres-data-pv
+  name: postgresql-pv
+  labels:
+    type: local
 spec:
+  storageClassName: manual
   capacity:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: local-storage
-  claimRef:
-    namespace: database
-    name: data-postgres-postgresql-0
   hostPath:
-    path: /data/postgres-data
-    type: DirectoryOrCreate
----
+    path: "/mnt/data"
+
+student:~/helm$ kubectl apply -f postgres-pv.yaml
+persistentvolume/postgresql-pv created
+
+student:~/helm$ kubectl get pv
+NAME            CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+postgresql-pv   10Gi       RWO            Retain           Available           manual         <unset>                          52s
+```
+
+
+создать PVC
+```
+student:~/helm$ cat postgres-pvc.yaml
 apiVersion: v1
-kind: PersistentVolume
+kind: PersistentVolumeClaim
 metadata:
-  name: postgres-dump-pv
+  name: postgresql-pv-claim
 spec:
-  capacity:
-    storage: 5Gi
+  storageClassName: manual
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: local-storage
-  claimRef:
-    namespace: database
-    name: postgres-postgresql-pgdumpall
-  hostPath:
-    path: /data/postgres-dump
-    type: DirectoryOrCreate
-
-student:~/helm$ kubectl create -f postgres-pv.yaml
-persistentvolume/postgres-data-pv created
-persistentvolume/postgres-dump-pv created
-
+  resources:
+    requests:
+      storage: 10Gi
+student:~/helm$ kubectl apply -f postgres-pvc.yaml
+persistentvolumeclaim/postgresql-pv-claim created
+student:~/helm$ kubectl get pvc
+NAME                  STATUS   VOLUME          CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+postgresql-pv-claim   Bound    postgresql-pv   10Gi       RWO            manual         <unset>                 12s
 ```
-https://cicube.io/blog/postgres-kubernetes/
-https://artifacthub.io/packages/helm/bitnami/postgresql-ha
 
-helm install helmtestrel oci://registry-1.docker.io/bitnamicharts/postgresql-ha --set postgresql.replicaCount=2
+установить Helm Chart
+```
+student:~/helm$ helm install psql-test bitnami/postgresql  --version 14.3.3 --set persistence.existingClaim=postgresql-pv-claim --set volumePermissions.enabled=true
+NAME: psql-test
+LAST DEPLOYED: Fri Jun 13 16:05:00 2025
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: postgresql
+CHART VERSION: 14.3.3
+APP VERSION: 16.2.0
+
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
+
+    psql-test-postgresql.default.svc.cluster.local - Read/Write connection
+
+To get the password for "postgres" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace default psql-test-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+
+To connect to your database run the following command:
+
+    kubectl run psql-test-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:16.2.0-debian-12-r8 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+      --command -- psql --host psql-test-postgresql -U postgres -d postgres -p 5432
+
+    > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1001} does not exist"
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace default svc/psql-test-postgresql 5432:5432 &
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
+
+WARNING: The configured password will be ignored on new installation in case when previous PostgreSQL release was deleted through the helm command. In that case, old PVC will have an old password, and setting it through helm won't take effect. Deleting persistent volumes (PVs) will solve the issue.
+
+WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
+  - primary.resources
+  - readReplicas.resources
+  - volumePermissions.resources
++info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+```
+
+
 
 **Укажите параметры подключения в values.yaml.**
 
