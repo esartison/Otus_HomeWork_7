@@ -339,6 +339,7 @@ version.BuildInfo{Version:"v3.18.1", GitCommit:"f6f8700a539c18101509434f3b59e6a2
 ```
 
 **Найдите и установите подходящий Helm-чарт PostgreSQL 14 (например, Bitnami PostgreSQL).**
+
 добавить репозиторий, для оригинального поймал ошибку - использовал российское зеркало
 ```
 student:~$ helm repo add bitnami https://charts.bitnami.com/bitnami
