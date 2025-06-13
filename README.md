@@ -387,15 +387,6 @@ global:
     openshift:
       adaptSecurityContext: auto
 
-kubeVersion: ""
-nameOverride: ""
-fullnameOverride: ""
-namespaceOverride: ""
-clusterDomain: cluster.local
-extraDeploy: []
-commonLabels: {}
-commonAnnotations: {}
-secretAnnotations: {}
 diagnosticMode:
   enabled: false
   command:
@@ -493,43 +484,6 @@ audit:
   hostAliases: []
   hostNetwork: false
   hostIPC: false
-  labels: {}
-  annotations: {}
-  podLabels: {}
-  podAnnotations: {}
-  podAffinityPreset: ""
-  podAntiAffinityPreset: soft
-  nodeAffinityPreset:
-    type: ""
-    key: ""
-    values: []
-  affinity: {}
-  nodeSelector: {}
-  tolerations: []
-  topologySpreadConstraints: []
-  priorityClassName: ""
-  schedulerName: ""
-  terminationGracePeriodSeconds: ""
-  updateStrategy:
-    type: RollingUpdate
-    rollingUpdate: {}
-  extraVolumeMounts: []
-  extraVolumes: []
-  sidecars: []
-  initContainers: []
-  pdb:
-    create: true
-    minAvailable: ""
-    maxUnavailable: ""
-  extraPodSpec: {}
-  networkPolicy:
-    enabled: true
-    allowExternal: true
-    allowExternalEgress: true
-    extraIngress: []
-    extraEgress: []
-    ingressNSMatchLabels: {}
-    ingressNSPodMatchLabels: {}
   service:
     type: ClusterIP
     ports:
@@ -620,29 +574,8 @@ readReplicas:
 
   podAffinityPreset: ""
   podAntiAffinityPreset: soft
-  nodeAffinityPreset:
-    type: ""
-    key: ""
-    values: []
-  affinity: {}
-  nodeSelector: {}
-  tolerations: []
-  topologySpreadConstraints: []
-  priorityClassName: ""
-  schedulerName: ""
-  terminationGracePeriodSeconds: ""
   updateStrategy:
     type: RollingUpdate
-    rollingUpdate: {}
-  extraVolumeMounts: []
-  extraVolumes: []
-  sidecars: []
-  initContainers: []
-  pdb:
-    create: true
-    minAvailable: ""
-    maxUnavailable: ""
-  extraPodSpec: {}
   networkPolicy:
     enabled: true
     allowExternal: true
@@ -658,10 +591,6 @@ readReplicas:
     nodePorts:
       postgresql: ""
     clusterIP: ""
-    labels: {}
-    annotations: {}
-    loadBalancerClass: ""
-    loadBalancerIP: ""
     externalTrafficPolicy: Cluster
     loadBalancerSourceRanges: []
     extraPorts: []
@@ -678,10 +607,6 @@ readReplicas:
     accessModes:
       - ReadWriteOnce
     size: 8Gi
-    annotations: {}
-    labels: {}
-    selector: {}
-    dataSource: {}
   persistentVolumeClaimRetentionPolicy:
     enabled: false
     whenScaled: Retain
@@ -720,10 +645,7 @@ backup:
       - /bin/bash
       - -c
       - PGPASSWORD="${PGPASSWORD:-$(< "$PGPASSWORD_FILE")}" pg_dumpall --clean --if-exists --load-via-partition-root --quote-all-identifiers --no-password --file="${PGDUMP_DIR}/pg_dumpall-$(date '+%Y-%m-%d-%H-%M').pgdump"
-    labels: {}
-    annotations: {}
-    nodeSelector: {}
-    tolerations: []
+
     resourcesPreset: "nano"
     resources: {}
     networkPolicy:
@@ -961,46 +883,14 @@ NOTES:
 CHART NAME: postgresql
 CHART VERSION: 14.3.3
 APP VERSION: 16.2.0
-
-** Please be patient while the chart is being deployed **
-
-PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
-
-    pges-postgresql-primary.default.svc.cluster.local - Read/Write connection
-
-    pges-postgresql-read.default.svc.cluster.local - Read only connection
-
-To get the password for "postgres" run:
-
-    export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace default pges-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
-
-To get the password for "esartisonus" run:
-
-    export POSTGRES_PASSWORD=$(kubectl get secret --namespace default pges-postgresql -o jsonpath="{.data.password}" | base64 -d)
-
-To connect to your database run the following command:
-
-    kubectl run pges-postgresql-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql:17.5.0-debian-12-r11 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
-      --command -- psql --host pges-postgresql-primary -U esartisonus -d esartisondb -p 5432
-
-    > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1001} does not exist"
-
-To connect to your database from outside the cluster execute the following commands:
-
-    kubectl port-forward --namespace default svc/pges-postgresql-primary 5432:5432 &
-    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U esartisonus -d esartisondb -p 5432
-
-WARNING: The configured password will be ignored on new installation in case when previous PostgreSQL release was deleted through the helm command. In that case, old PVC will have an old password, and setting it through helm won't take effect. Deleting persistent volumes (PVs) will solve the issue.
-
-WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
-  - primary.resources
+......
   - readReplicas.resources
 +info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 ```
 
 Еще одна релика добавилась как мы и ожидали
 ![image](https://github.com/user-attachments/assets/860a2da6-1b4f-44bb-abf6-57556f4912ff)
-
+Успех
 
 ## 🔥 Кризисный момент ## 
 
@@ -1012,10 +902,13 @@ WARNING: There are "resources" sections in the chart not set. Using "resourcesPr
 ## 📎 Что сдавать ## 
 **📷 Скриншот результата SELECT-запроса из PostgreSQL**
 На праймари
+
 ![image](https://github.com/user-attachments/assets/7f59e32a-e0c2-42d6-a129-479119874d0b)
 
 На реплике
+
 ![image](https://github.com/user-attachments/assets/48c00234-888b-4ff1-8bd4-20862b432305)
+
 ![image](https://github.com/user-attachments/assets/0411f882-603e-4782-bb92-e40921d2d2d9)
 
 
