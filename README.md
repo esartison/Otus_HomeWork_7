@@ -902,11 +902,12 @@ APP VERSION: 16.2.0
 
 ## 📎 Что сдавать ## 
 **📷 Скриншот результата SELECT-запроса из PostgreSQL**
-На праймари
+
+!На праймари!
 
 ![image](https://github.com/user-attachments/assets/7f59e32a-e0c2-42d6-a129-479119874d0b)
 
-На реплике
+!На реплике!
 
 ![image](https://github.com/user-attachments/assets/48c00234-888b-4ff1-8bd4-20862b432305)
 
