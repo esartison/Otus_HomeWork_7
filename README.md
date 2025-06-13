@@ -413,7 +413,7 @@ postgresql-pv-claim   Bound    postgresql-pv   10Gi       RWO            manual 
 установить Helm Chart
 ```
 helm install mypg bitnami/postgresql --version 14.3.3 -f values.yaml
-helm upgrade mypg bitnami/postgresql --version 14.3.3 -f values.yaml
+helm upgrade mypg bitnami/postgresql --version 14.3.3 --values values4.yaml --set replication.readReplicas=4
 ```
 
 
